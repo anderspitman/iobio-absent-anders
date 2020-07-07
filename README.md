@@ -1,6 +1,8 @@
 # Backend
 
-The backend deployment is relatively robust.
+The backend deployment is relatively robust. The stealthcheck service should
+keep everything running. I've given a rundown of all our services to aid in
+debugging in case something unexpected happens.
 
 
 ## AWS
