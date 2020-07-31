@@ -71,7 +71,7 @@ notice if it breaks anyway. Eventually we'll get this managed by stealthcheck.
 
 ## PE
 
-Our PE deployment is currently a bit hacky, but also simple. It just consists
+Our PE deployment is pretty simple. It just consists
 of gru instance and Mosaic instance. If it has issues, you need to ssh into
 mosaic.chpc.utah.edu. Then su to the ucgd-peanalysis user (you might not have
 permissions to do this. Ask Yi, Al, or Matt, and worst case Shawn Rynearson has
@@ -87,8 +87,15 @@ Now attach to my running ucgd-peanalysis tmux session:
 tmux a
 ```
 
-One window is running gru, the other is running Mosaic. To switch between them
-do `CTRL-B n`. You can read up on tmux for more commands.
+One window has a stealthcheck instance running in
+`/scratch/ucgd/lustre/work/proj_UCGD/ucgd-peanalysis/stealthcheck/instance1`.
+It will take care of keeping gru and Mosaic running.
 
+If it crashes for some reason, you can restart it by going to that directory
+and running:
+
+```bash
+../stealthcheck
+```
 
 [0]: https://github.com/anderspitman/stealthcheck
