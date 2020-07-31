@@ -20,6 +20,13 @@ directory), and one on lf-proxy.iobio.io. Look at
 commands used to check and run the various services. That should be very
 helpful in debugging them if something goes wrong.
 
+If something catastrophic happens and you can't access the `checks.json` files,
+you can look at the following repos for backups:
+
+* https://github.com/iobio/stealthcheck_config_1
+
+* https://github.com/iobio/stealthcheck_config_2
+
 
 ### fibridge
 
