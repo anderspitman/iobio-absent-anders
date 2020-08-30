@@ -37,6 +37,27 @@ want to debug it you'll need to ssh into ubuntu@lf-proxy.iobio.io and figure
 out why the executable isn't running on port 9001. I've never had it stay down
 since using stealthcheck.
 
+There are a couple unique things that can go wrong with fibridge. The first
+is if the TLS cert expires. We're currently using a Let's Encrypt cert,
+so we have to manage it manually. You can see from the stealthcheck config
+where the cert is stored. In order to renew it, you need to run:
+
+```
+sudo certbot renew
+```
+
+But that won't work as long as fibridge is running on port 80, so you
+need to kill fibridge first. But stealthcheck will restart it. You could
+stop stealthcheck, but what I usually do is `sudo killall fibridge-rs`
+and then quickly run `sudo certbot renew` before fibridge comes back
+up.
+
+Another thing to look out for is if the fibridge machine reboots, port
+80 needs to route to port 9001 and 443 to 9002. This is to avoid
+running fibridge as root. You can easy google how to do this with 
+the iptables command. There's also a rules.v4 file in the home directory
+that you can use.
+
 
 ### quarantest
 
