@@ -5,28 +5,40 @@ keep everything running. I've given a rundown of all our services to aid in
 debugging in case something unexpected happens.
 
 
-## AWS
+## General information
+
+
+### SSH access
+
+All of the machines involved should be accessible by the `ubuntu` user via the
+`iobioServers.cer` private key. If you don't have a copy ask Yi or Anders.
 
 
 ### stealthcheck
 
+Most of our services, both on AWS and CHPC, are controlled by stealthcheck.
 [stealthcheck][0] is a very simple monitoring service I built. It does health
 checks on our other services, and sends an email alert and attempts to restart
-them if they go down. It's been working quite well the past couple months.
+them if they go down.
 
-There are 2 instances running, one on dev.backend.iobio.io (in the stealthcheck
-directory), and one on lf-proxy.iobio.io. Look at
-`/home/ubuntu/stealthcheck/checks.json` on dev.backend.iobio.io to see all the
-commands used to check and run the various services. That should be very
-helpful in debugging them if something goes wrong.
+There are 2 instances running, stealthcheck1.iobio.io and
+stealthcheck2.iobio.io. stealthcheck1 is the one that monitors all the other
+services, including stealthcheck2. The only purpose of stealthcheck2 is to
+monitor stealthcheck1.
 
-If something catastrophic happens and you can't access the `checks.json` files,
-you can look at the following repos for backups:
+See the private repo [here](https://github.com/iobio/iobio-stealthcheck) for
+more information about stealthcheck, including how to set up our AWS
+stealthcheck deployment from scratch if either of the VMs becomes
+unrecoverable.
 
-* https://github.com/iobio/stealthcheck_config_1
+One especially important detail is that the [checks.json file][1] for
+stealthcheck1 contains all the commands ("fail_command") used to start our
+other services. In the worst case scenario, you can shut down stealthcheck
+and just SSH into the various machines and run those commands manually. You'll
+lose monitoring and email alerts, but this is the simplest setup.
 
-* https://github.com/iobio/stealthcheck_config_2
 
+## AWS
 
 ### fibridge
 
@@ -34,8 +46,7 @@ fibridge is used for local file support in the iobio apps. It should be kept
 alive by stealthcheck. It's probably not the end of the world if it goes down
 for a couple days, though we'll likely get a few emails from users. If you
 want to debug it you'll need to ssh into ubuntu@lf-proxy.iobio.io and figure
-out why the executable isn't running on port 9001. I've never had it stay down
-since using stealthcheck.
+out why the executable isn't running on port 9001.
 
 There are a couple unique things that can go wrong with fibridge. The first
 is if the TLS cert expires. We're currently using a Let's Encrypt cert,
@@ -67,21 +78,32 @@ non-critical service, so if it goes down just wait until Anders gets back.
 
 ### gru
 
-Most problems with the AWS gru can be fixed by identifying naughty nodes and
-terminating them. The auto scaling will take care of replacing it. You can look
-at the monitoring information in the AWS console (the nodes are named like
-`gru-backend-worker-0.XX.0`). If any of the nodes are consistently using more
-than 10% CPU, go ahead and kill them. It probably means gru has a renegade
-process spinning its wheels. It's not a bad idea to check on this every few
-days.
+The first thing to do if you suspect something is wrong with the AWS gru
+backend is perform an instance refresh from the AWS console.
+
+This is accomplished by going to `EC2>Auto Scaling>Auto Scaling
+Groups>gru-backend>Instance refresh>Start instance refresh>Start`. I usually
+change the settings to 50% and 60 seconds but it probably doesn't matter too
+much.
+
+It takes a number of minutes to complete. You can monitor the nodes under
+`EC2>Load Balancing>Target Groups>gru-backend-0-7-0>Targets` to track the
+refresh progress.
 
 If that doesn't solve the problem, you'll also need to make sure the DNS
 (route 53), TLS certificates, and load balancer are working.
 
+You can also try to SSH into the individual VMs (they are named like gru-1.X.X)
+and see if you can find anything fishy going on. I would be very surprised if
+it got to this point.
+
 
 ### Phenolyzer
 
-Phenolyzer runs on services.backend.iobio.io.
+Phenolyzer runs on services.backend.iobio.io. This has actually been quite
+tempermental lately, going down every few days. I haven't had time to track
+down the issue. You'll need to keep an eye out for monitoring emails.
+Instructions for fixing it are [here][2].
 
 
 ### Multialign
@@ -90,13 +112,13 @@ Tony is currently in charge of Multialign. She'll probably be the first to
 notice if it breaks anyway. Eventually we'll get this managed by stealthcheck.
 
 
-## PE
+## CHPC
 
-Our PE deployment is pretty simple. It just consists
-of gru instance and Mosaic instance. If it has issues, you need to ssh into
-mosaic.chpc.utah.edu. Then su to the ucgd-peanalysis user (you might not have
-permissions to do this. Ask Yi, Al, or Matt, and worst case Shawn Rynearson has
-access to this command):
+Our CHPC PE deployment is pretty simple. It just consists of gru instance and
+Mosaic instance. If it has issues, you need to ssh into mosaic.chpc.utah.edu.
+Then su to the ucgd-peanalysis user (you might not have permissions to do this.
+Ask Yi, Al, or Matt, and worst case Shawn Rynearson has access to this
+command):
 
 ```bash
 sudo su - ucgd-peanalysis
@@ -119,4 +141,18 @@ and running:
 ../stealthcheck
 ```
 
+
+## CDDRC
+
+We have a relatively new instance of Mosaic running on the machine
+`cddrc.utah.edu` for the CDDRC project. It shares the gru backend with the main
+instance. It's also less critical than the main instance. Currently if it goes
+down you're just going to have to wait for Anders to get back, since it's
+running on his personal UNID account.
+
+
 [0]: https://github.com/anderspitman/stealthcheck
+
+[1]: https://github.com/iobio/iobio-stealthcheck/blob/master/stealthcheck1.iobio.io/checks.json
+
+[2]: https://github.com/iobio/iobio-backend-services/blob/master/docs/fixing_phenolyzer.md
