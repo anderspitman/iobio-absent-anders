@@ -21,6 +21,11 @@ Most of our services, both on AWS and CHPC, are controlled by stealthcheck.
 checks on our other services, and sends an email alert and attempts to restart
 them if they go down.
 
+
+## AWS
+
+### stealthcheck
+
 There are 2 instances running, stealthcheck1.iobio.io and
 stealthcheck2.iobio.io. stealthcheck1 is the one that monitors all the other
 services, including stealthcheck2. The only purpose of stealthcheck2 is to
@@ -31,22 +36,27 @@ more information about stealthcheck, including how to set up our AWS
 stealthcheck deployment from scratch if either of the VMs becomes
 unrecoverable.
 
-One especially important detail is that the [checks.json file][1] for
-stealthcheck1 contains all the commands ("fail_command") used to start our
-other services. In the worst case scenario, you can shut down stealthcheck
-and just SSH into the various machines and run those commands manually. You'll
-lose monitoring and email alerts, but this is the simplest setup.
+However, if you run into problems with stealthcheck, it's recommended to just
+shut it down (can simply stop stealthcheck1 and stealthcheck2 from the AWS
+console) and running the services manually until Anders gets back to fix it.
+All of the necessary commands are in the [checks.json file][1] for
+stealthcheck1 (look under the `fail_command` keys). You can SSH into the
+various machines and run the commands shown. You'll lose monitoring and email
+alerts (ie you'll need to keep an eye on things manually), but it should be
+sufficient to limp along for several days.
 
+The only two that are actually important are fibridge and
+`services.backend.iobio.io` (which is currently just for phenolyzer). You can
+pretty safely ignore the others. Information for each service is below.
 
-## AWS
 
 ### fibridge
 
-fibridge is used for local file support in the iobio apps. It should be kept
-alive by stealthcheck. It's probably not the end of the world if it goes down
-for a couple days, though we'll likely get a few emails from users. If you
-want to debug it you'll need to ssh into ubuntu@lf-proxy.iobio.io and figure
-out why the executable isn't running on port 9001.
+fibridge is used for local file support in the iobio apps. It's probably not
+the end of the world if it goes down for a couple days, though we'll likely get
+a few emails from users. If you want to debug it you'll need to ssh into
+ubuntu@lf-proxy.iobio.io and figure out why the executable isn't running on
+port 9001.
 
 There are a couple unique things that can go wrong with fibridge. The first
 is if the TLS cert expires. We're currently using a Let's Encrypt cert,
@@ -68,6 +78,21 @@ Another thing to look out for is if the fibridge machine reboots, port
 running fibridge as root. You can easy google how to do this with 
 the iptables command. There's also a rules.v4 file in the home directory
 that you can use.
+
+
+### Phenolyzer
+
+Phenolyzer runs on services.backend.iobio.io. This has actually been quite
+temperamental lately, going down every few days. I haven't had time to track
+down the issue. You'll need to keep an eye out for monitoring emails, or if
+you're monitoring manually (ie stealthcheck is down), you can use the
+following curl to quickly verify that it's running:
+
+```
+curl --fail --max-time 5 https://services.backend.iobio.io/
+```
+
+If that command fails, instructions for fixing phenolyzer are [here][2].
 
 
 ### quarantest
@@ -98,12 +123,6 @@ and see if you can find anything fishy going on. I would be very surprised if
 it got to this point.
 
 
-### Phenolyzer
-
-Phenolyzer runs on services.backend.iobio.io. This has actually been quite
-tempermental lately, going down every few days. I haven't had time to track
-down the issue. You'll need to keep an eye out for monitoring emails.
-Instructions for fixing it are [here][2].
 
 
 ### Multialign
