@@ -73,12 +73,6 @@ stop stealthcheck, but what I usually do is `sudo killall fibridge-rs`
 and then quickly run `sudo certbot renew` before fibridge comes back
 up.
 
-Another thing to look out for is if the fibridge machine reboots, port
-80 needs to route to port 9001 and 443 to 9002. This is to avoid
-running fibridge as root. You can easy google how to do this with 
-the iptables command. There's also a rules.v4 file in the home directory
-that you can use.
-
 
 ### Phenolyzer
 
