@@ -73,6 +73,12 @@ stop stealthcheck, but what I usually do is `sudo killall fibridge-rs`
 and then quickly run `sudo certbot renew` before fibridge comes back
 up.
 
+**NOTE:** If you're running fibridge manually (ie stealthcheck is down), it
+can appear to be working when it isn't. One way to verify it's actually ok
+is by running bam.iobio with local files. If it doesn't work there's a good
+chance fibridge needs to be restarted. Checking once a day is probably
+sufficient.
+
 
 ### Phenolyzer
 
