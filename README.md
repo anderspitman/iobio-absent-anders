@@ -160,6 +160,10 @@ and running:
 ../stealthcheck
 ```
 
+If that doesn't work for some reason, you can run Mosaic and gru manually as
+with the AWS services above. Just look in the `instance1/checks.json` file for
+the proper commands to run.
+
 
 ## CDDRC
 
