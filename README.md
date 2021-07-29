@@ -160,18 +160,44 @@ and running:
 ../stealthcheck
 ```
 
-If that doesn't work for some reason, you can run Mosaic and gru manually as
-with the AWS services above. Just look in the `instance1/checks.json` file for
-the proper commands to run.
+If that doesn't work, you can run Mosaic and gru manually as with the AWS
+services above. Just look in the `instance1/checks.json` file for the proper
+commands to run.
+
+If the mosaic.chcp.utah.edu machine restarts, you'll need to login as the
+ucgd-peanalysis user and start a fresh tmux session and run stealthcheck as
+shown above.
 
 
 ## CDDRC
 
 We have a relatively new instance of Mosaic running on the machine
 `cddrc.utah.edu` for the CDDRC project. It shares the gru backend with the main
-instance. It's also less critical than the main instance. Currently if it goes
-down you're just going to have to wait for Anders to get back, since it's
-running on his personal UNID account.
+PE instance.
+
+This instance is less critical and isn't currently managed by stealthcheck.
+If there are problems with it, SSH into the machine and switch to the `cddrc`
+user and attach to the tmux session (you'll need to start a tmux session if
+the machine rebooted):
+
+```
+ssh <unid>@cddrc.utah.edu
+sudo su - cddrc
+tmux a
+```
+
+Then just start Mosaic manually:
+
+```
+./run_mosaic.sh
+```
+
+To get persistent logs:
+
+```
+./run_mosaic.sh >> log.txt 2>>error_log.txt
+```
+
 
 
 [0]: https://github.com/anderspitman/stealthcheck
