@@ -115,6 +115,13 @@ It takes a number of minutes to complete. You can monitor the nodes under
 `EC2>Load Balancing>Target Groups>gru-backend-0-7-0>Targets` to track the
 refresh progress.
 
+**NOTE:** After doing an instance refresh, some requests will be very slow
+the first time. I'm pretty certain this is because AWS has to download the
+EBS volume data from S3. After doing a refresh, I like to run gene.iobio
+with the sample data. It will take a few minutes to complete, but this
+reduces the chance that one of our users will be the first to hit the
+slowness.
+
 If that doesn't solve the problem, you'll also need to make sure the DNS
 (route 53), TLS certificates, and load balancer are working.
 
