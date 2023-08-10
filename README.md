@@ -54,7 +54,12 @@ pretty safely ignore the others. Information for each service is below.
 
 fibridge is used for local file support in the iobio apps. It's probably not
 the end of the world if it goes down for a couple days, though we'll likely get
-a few emails from users. If you want to debug it you'll need to ssh into
+a few emails from users.
+
+First thing to try is rebooting (NOT terminating) the instance from the AWS
+EC2 dashboard.
+
+If you want to debug directly you'll need to ssh into
 ubuntu@lf-proxy.iobio.io and figure out why the executable isn't running on
 port 9001.
 
@@ -112,15 +117,8 @@ change the settings to 50% and 60 seconds but it probably doesn't matter too
 much.
 
 It takes a number of minutes to complete. You can monitor the nodes under
-`EC2>Load Balancing>Target Groups>gru-backend-0-7-0>Targets` to track the
+`EC2>Load Balancing>Target Groups>gru-target-group>Targets` to track the
 refresh progress.
-
-**NOTE:** After doing an instance refresh, some requests will be very slow
-the first time. I'm pretty certain this is because AWS has to download the
-EBS volume data from S3. After doing a refresh, I like to run gene.iobio
-with the sample data. It will take a few minutes to complete, but this
-reduces the chance that one of our users will be the first to hit the
-slowness.
 
 If that doesn't solve the problem, you'll also need to make sure the DNS
 (route 53), TLS certificates, and load balancer are working.
@@ -128,8 +126,6 @@ If that doesn't solve the problem, you'll also need to make sure the DNS
 You can also try to SSH into the individual VMs (they are named like gru-1.X.X)
 and see if you can find anything fishy going on. I would be very surprised if
 it got to this point.
-
-
 
 
 ### Multialign
@@ -141,69 +137,27 @@ notice if it breaks anyway. Eventually we'll get this managed by stealthcheck.
 ## CHPC
 
 Our CHPC PE deployment is pretty simple. It just consists of gru instance and
-Mosaic instance. If it has issues, you need to ssh into mosaic.chpc.utah.edu.
-Then su to the ucgd-peanalysis user (you might not have permissions to do this.
-Ask Yi, Al, or Matt, and worst case Shawn Rynearson has access to this
-command):
+Mosaic instance. These are both managed by
+[systemd](https://en.wikipedia.org/wiki/Systemd) services. The files for these
+services are `/etc/systemd/system/iobio-gru-backend.service` and
+`/etc/systemd/system/mosaic.service`. Inpsecting those files will tell you
+exactly how the services are run.
 
-```bash
-sudo su - ucgd-peanalysis
-```
-
-Now attach to my running ucgd-peanalysis tmux session:
-
-```bash
-tmux a
-```
-
-One window has a stealthcheck instance running in
-`/scratch/ucgd/lustre/work/proj_UCGD/ucgd-peanalysis/stealthcheck/instance1`.
-It will take care of keeping gru and Mosaic running.
-
-If it crashes for some reason, you can restart it by going to that directory
-and running:
-
-```bash
-../stealthcheck
-```
-
-If that doesn't work, you can run Mosaic and gru manually as with the AWS
-services above. Just look in the `instance1/checks.json` file for the proper
-commands to run.
-
-If the mosaic.chcp.utah.edu machine restarts, you'll need to login as the
-ucgd-peanalysis user and start a fresh tmux session and run stealthcheck as
-shown above.
+If something goes wrong, Chase would be the best person to ask to take a
+look. You'll need sudo permissions for systemd in order to do most debugging.
+`sudo -l` will tell you what commands you have access. Refer to the systemd docs
+for how to use the commands `systemctl` and `journalctl`. If you don't have
+access to the commands, you'll need to email `helpdesk@chpc.utah.edu`.
 
 
 ## CDDRC
 
-We have a relatively new instance of Mosaic running on the machine
+We have an instance of Mosaic running on the machine
 `cddrc.utah.edu` for the CDDRC project. It shares the gru backend with the main
 PE instance.
 
-This instance is less critical and isn't currently managed by stealthcheck.
-If there are problems with it, SSH into the machine and switch to the `cddrc`
-user and attach to the tmux session (you'll need to start a tmux session if
-the machine rebooted):
-
-```
-ssh <unid>@cddrc.utah.edu
-sudo su - cddrc
-tmux a
-```
-
-Then just start Mosaic manually:
-
-```
-./run_mosaic.sh
-```
-
-To get persistent logs:
-
-```
-./run_mosaic.sh >> log.txt 2>>error_log.txt
-```
+The systemd file is at `/etc/systemd/system/mosaic.service`. Refer to the
+CHPC instructions above for details.
 
 
 
