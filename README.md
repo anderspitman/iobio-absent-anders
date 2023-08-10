@@ -138,9 +138,9 @@ notice if it breaks anyway. Eventually we'll get this managed by stealthcheck.
 
 Our CHPC PE deployment is pretty simple. It just consists of gru instance and
 Mosaic instance. These are both managed by
-[systemd](https://en.wikipedia.org/wiki/Systemd) services. The files for these
+[systemd][3] services. The files for these
 services are `/etc/systemd/system/iobio-gru-backend.service` and
-`/etc/systemd/system/mosaic.service`. Inpsecting those files will tell you
+`/etc/systemd/system/mosaic.service`. Inspecting those files will tell you
 exactly how the services are run.
 
 If something goes wrong, Chase would be the best person to ask to take a
@@ -166,3 +166,5 @@ CHPC instructions above for details.
 [1]: https://github.com/iobio/iobio-stealthcheck/blob/master/stealthcheck1.iobio.io/checks.json
 
 [2]: https://github.com/iobio/iobio-backend-services/blob/master/docs/fixing_phenolyzer.md
+
+[3]: https://en.wikipedia.org/wiki/Systemd
